@@ -54,8 +54,11 @@ public class ServerCluster {
         int counter = 0;
         for (Server server:servers) {
             if (server.getMessages().contains(message)) counter++;
+            //zepsute serwery traktuję jakby miały wiadomość, żeby pętla nie trwała w nieskończoność
+            else if(!server.isActive()) counter++;
         }
         if(counter == servers.size()) allServersHasMessage = true;
+        System.out.println("Serwery mające wiadomość lub popsute: " + counter);
         return  allServersHasMessage;
     }
 
@@ -74,16 +77,41 @@ public class ServerCluster {
         while(from.getAddresses().get(servers.indexOf(destination)) == 0);
 
         System.out.println("Wysyłam wiadomość z: " + servers.indexOf(from) + ", do: " + servers.indexOf(destination));
+        //obsługa zapsutego serwera
+        if(!destination.isActive()) {
+            System.out.println("Serwer docelowy nie działa, wysłanie nie powiodło się");
+            float tmp = from.getAddresses().get(servers.indexOf(destination));
+            from.getAddresses().put(servers.indexOf(destination), tmp - 0.5F);
+            if(from.getAddresses().get(servers.indexOf(destination)) == 0)
+                System.out.println("Dwukrotnie serwer nie odebrał - nie będę więcej próbować");
+        }
         if(destination.getMessages().contains(message)) {
             //serwer docelowy ma już wiadomość
             System.out.println("Serwer: " + servers.indexOf(destination) + " ma już tą wiadomość.");
             float tmp = from.getAddresses().get(servers.indexOf(destination));
             from.getAddresses().put(servers.indexOf(destination), tmp - 0.5F);
+            if(from.getAddresses().get(servers.indexOf(destination)) == 0)
+                System.out.println("Dwukrotnie serwer nie odebrał - nie będę więcej próbować");
         }
         else {
             //wiadomość jest nowa
             destination.getMessages().add(message);
             System.out.println("Serwer: " + servers.indexOf(destination) + " odebrał wiadomość!");
+        }
+    }
+
+    public void deactivateServer(int id) {
+        System.out.println("Zepsułem serwer numer: " + id);
+        servers.get(id).setActive(false);
+    }
+
+    public void displayServerMessages() {
+        System.out.println("Stan pamięci serwerów:");
+        for (Server server:servers) {
+            if(server.isActive())
+                System.out.println(server.getMessages());
+            else
+                System.out.println("Serwer popsuty");
         }
     }
 
