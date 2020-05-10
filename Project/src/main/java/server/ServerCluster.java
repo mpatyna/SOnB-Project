@@ -2,6 +2,7 @@ package server;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 public class ServerCluster {
@@ -112,6 +113,18 @@ public class ServerCluster {
                 System.out.println(server.getMessages());
             else
                 System.out.println("Serwer popsuty");
+        }
+    }
+
+    public void cleanServerStatus() {
+        System.out.println("Naprawiem uszkodzone serwry i przestawiam wagi w adresach");
+        for (Server server:servers) {
+            //uruchamiam wszystkie serwery
+            server.setActive(true);
+            //czyszczę wagi dla adresów
+            for (Map.Entry<Integer, Float> entry : server.getAddresses().entrySet()) {
+                entry.setValue(1F);
+            }
         }
     }
 
