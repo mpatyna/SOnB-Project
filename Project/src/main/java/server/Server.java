@@ -8,12 +8,10 @@ import java.util.Map;
 public class Server {
     private List<String> messages;
     private Map<Integer, Float> addresses;
-    private boolean active;
 
     public Server() {
         this.messages = new ArrayList<>();
         this.addresses = new HashMap<>();
-        active = true;
     }
 
     public List<String> getMessages() {
@@ -32,11 +30,4 @@ public class Server {
         this.addresses = addresses;
     }
 
-    public boolean isActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
-    }
 }

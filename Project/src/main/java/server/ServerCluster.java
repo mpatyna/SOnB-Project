@@ -55,11 +55,9 @@ public class ServerCluster {
         int counter = 0;
         for (Server server:servers) {
             if (server.getMessages().contains(message)) counter++;
-            //zepsute serwery traktuję jakby miały wiadomość, żeby pętla nie trwała w nieskończoność
-            else if(!server.isActive()) counter++;
         }
         if(counter == servers.size()) allServersHasMessage = true;
-        System.out.println("Serwery mające wiadomość lub popsute: " + counter);
+        System.out.println("Serwery mające wiadomość: " + counter);
         return  allServersHasMessage;
     }
 
@@ -79,10 +77,10 @@ public class ServerCluster {
 
         System.out.println("Wysyłam wiadomość z: " + servers.indexOf(from) + ", do: " + servers.indexOf(destination));
         //obsługa zapsutego serwera
-        if(!destination.isActive()) {
-            System.out.println("Serwer docelowy nie działa, wysłanie nie powiodło się");
+        if(from.getAddresses().get(servers.indexOf(destination)) < 0) {
+            System.out.println("Połączenie uszkodzone, wysłanie nie powiodło się.");
             float tmp = from.getAddresses().get(servers.indexOf(destination));
-            from.getAddresses().put(servers.indexOf(destination), tmp - 0.5F);
+            from.getAddresses().put(servers.indexOf(destination), tmp + 0.5F);
             if(from.getAddresses().get(servers.indexOf(destination)) == 0)
                 System.out.println("Dwukrotnie serwer nie odebrał - nie będę więcej próbować");
         }
@@ -101,26 +99,22 @@ public class ServerCluster {
         }
     }
 
-    public void deactivateServer(int id) {
-        System.out.println("Zepsułem serwer numer: " + id);
-        servers.get(id).setActive(false);
+    public void deactivateConnection(int server1Id, int server2Id) {
+        System.out.println("Zepsułem połączenie między serwerem " + server1Id + " i serverem " + server2Id);
+        servers.get(server1Id).getAddresses().put(server2Id, -1F);
+        servers.get(server2Id).getAddresses().put(server1Id, -1F);
     }
 
     public void displayServerMessages() {
         System.out.println("Stan pamięci serwerów:");
         for (Server server:servers) {
-            if(server.isActive())
-                System.out.println(server.getMessages());
-            else
-                System.out.println("Serwer popsuty");
+            System.out.println(server.getMessages());
         }
     }
 
     public void cleanServerStatus() {
-        System.out.println("Naprawiem uszkodzone serwry i przestawiam wagi w adresach");
+        System.out.println("Naprawiem uszkodzone połączenia i przestawiam wagi w adresach");
         for (Server server:servers) {
-            //uruchamiam wszystkie serwery
-            server.setActive(true);
             //czyszczę wagi dla adresów
             for (Map.Entry<Integer, Float> entry : server.getAddresses().entrySet()) {
                 entry.setValue(1F);
