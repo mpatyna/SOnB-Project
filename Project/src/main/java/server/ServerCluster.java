@@ -7,6 +7,7 @@ import java.util.Random;
 
 public class ServerCluster {
     private List<Server> servers;
+    private List<String> consolMessages= new ArrayList<>();
 
     public ServerCluster() {
         this.servers = new ArrayList<>();
@@ -21,15 +22,16 @@ public class ServerCluster {
         }
     }
 
-    public void gossip(String message) throws InterruptedException {
+    public List<String> gossip(String message) throws InterruptedException {
+        consolMessages= new ArrayList<>();
         //dodaję wiadomość do pierwszego serwera
         servers.get(0).getMessages().add(message);
         int counter = 0;
-        System.out.println("Serwer nr. 0 otrzymał wiadomość: " + message + ". Rozpoczynam algorytm...");
+        consolMessages.add("Serwer nr. 0 otrzymał wiadomość: " + message + ". Rozpoczynam algorytm...");
         //co sekundę rozsyłam wiadomość do losowych serwerów
         while(!ifAllServersHaveMessage(message)) {
-            System.out.println("----------------------------");
-            System.out.println("Cykl nr. " + counter);
+            consolMessages.add("----------------------------");
+            consolMessages.add("Cykl nr. " + counter);
             List<Integer> destinations = new ArrayList<>();
             //znajduję serwery mające wiadomość do wysłania
             for (Server server:servers) {
@@ -45,9 +47,10 @@ public class ServerCluster {
             }
             counter++;
             //symuluję cykliczne rosyłanie
-            Thread.sleep(2000);
+            Thread.sleep(100);
         }
-        System.out.println("Wszystkie serwery mają wiadomość. Zajęło to: " + counter + " cykli.");
+        consolMessages.add("Wszystkie serwery mają wiadomość. Zajęło to: " + counter + " cykli.");
+        return consolMessages;
     }
 
     public boolean ifAllServersHaveMessage(String message) {
@@ -57,7 +60,7 @@ public class ServerCluster {
             if (server.getMessages().contains(message)) counter++;
         }
         if(counter == servers.size()) allServersHasMessage = true;
-        System.out.println("Serwery mające wiadomość: " + counter);
+        consolMessages.add("Serwery mające wiadomość: " + counter);
         return  allServersHasMessage;
     }
 
@@ -75,27 +78,27 @@ public class ServerCluster {
         }
         while(from.getAddresses().get(servers.indexOf(destination)) == 0);
 
-        System.out.println("Wysyłam wiadomość z: " + servers.indexOf(from) + ", do: " + servers.indexOf(destination));
+        consolMessages.add("Wysyłam wiadomość z: " + servers.indexOf(from) + ", do: " + servers.indexOf(destination));
         //obsługa zapsutego serwera
         if(from.getAddresses().get(servers.indexOf(destination)) < 0) {
-            System.out.println("Połączenie uszkodzone, wysłanie nie powiodło się.");
+            consolMessages.add("Połączenie uszkodzone, wysłanie nie powiodło się.");
             float tmp = from.getAddresses().get(servers.indexOf(destination));
             from.getAddresses().put(servers.indexOf(destination), tmp + 0.5F);
             if(from.getAddresses().get(servers.indexOf(destination)) == 0)
-                System.out.println("Dwukrotnie serwer nie odebrał - nie będę więcej próbować");
+                consolMessages.add("Dwukrotnie serwer nie odebrał - nie będę więcej próbować");
         }
         if(destination.getMessages().contains(message)) {
             //serwer docelowy ma już wiadomość
-            System.out.println("Serwer: " + servers.indexOf(destination) + " ma już tą wiadomość.");
+            consolMessages.add("Serwer: " + servers.indexOf(destination) + " ma już tą wiadomość.");
             float tmp = from.getAddresses().get(servers.indexOf(destination));
             from.getAddresses().put(servers.indexOf(destination), tmp - 0.5F);
             if(from.getAddresses().get(servers.indexOf(destination)) == 0)
-                System.out.println("Dwukrotnie serwer nie odebrał - nie będę więcej próbować");
+                consolMessages.add("Dwukrotnie serwer nie odebrał - nie będę więcej próbować");
         }
         else {
             //wiadomość jest nowa
             destination.getMessages().add(message);
-            System.out.println("Serwer: " + servers.indexOf(destination) + " odebrał wiadomość!");
+            consolMessages.add("Serwer: " + servers.indexOf(destination) + " odebrał wiadomość!");
         }
     }
 
@@ -105,11 +108,13 @@ public class ServerCluster {
         servers.get(server2Id).getAddresses().put(server1Id, -1F);
     }
 
-    public void displayServerMessages() {
-        System.out.println("Stan pamięci serwerów:");
+    public List<String> displayServerMessages() {
+        List<String> messages = new ArrayList<>();
+        messages.add("Stan pamięci serwerów:");
         for (Server server:servers) {
-            System.out.println(server.getMessages());
+            messages.addAll(server.getMessages());
         }
+        return messages;
     }
 
     public void cleanServerStatus() {
