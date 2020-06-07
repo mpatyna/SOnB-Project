@@ -30,4 +30,14 @@ public class Server {
         this.addresses = addresses;
     }
 
+    public Map<Integer, Boolean> getConnections() {
+        Map<Integer, Boolean> connections = new HashMap<>();
+        addresses.forEach((k, v) -> {
+            boolean value = true;
+            if(v < 0) value = false;
+            connections.put(k, value);
+        });
+        return connections;
+    }
+
 }
