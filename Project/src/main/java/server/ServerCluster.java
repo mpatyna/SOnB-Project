@@ -111,8 +111,11 @@ public class ServerCluster {
     public List<String> displayServerMessages() {
         List<String> messages = new ArrayList<>();
         messages.add("Stan pamięci serwerów:");
+        Integer no=1;
         for (Server server:servers) {
+            messages.add("_____ Serwer "+no+"_____");
             messages.addAll(server.getMessages());
+            no++;
         }
         return messages;
     }
