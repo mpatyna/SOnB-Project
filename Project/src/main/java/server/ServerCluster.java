@@ -1,13 +1,11 @@
 package server;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 public class ServerCluster {
     private List<Server> servers;
     private List<String> consolMessages= new ArrayList<>();
+    private Map<Integer, Integer> chart = new HashMap<>();
 
     public ServerCluster() {
         this.servers = new ArrayList<>();
@@ -50,6 +48,7 @@ public class ServerCluster {
             Thread.sleep(100);
         }
         consolMessages.add("Wszystkie serwery mają wiadomość. Zajęło to: " + counter + " cykli.");
+        chart.put(new Integer(chart.size()),new Integer(counter));
         return consolMessages;
     }
 
@@ -107,6 +106,11 @@ public class ServerCluster {
         servers.get(server1Id).getAddresses().put(server2Id, -1F);
         servers.get(server2Id).getAddresses().put(server1Id, -1F);
     }
+    public void activateConnection(int server1Id, int server2Id) {
+        System.out.println("Naprawiłem połączenie między serwerem " + server1Id + " i serverem " + server2Id);
+        servers.get(server1Id).getAddresses().put(server2Id, 1F);
+        servers.get(server2Id).getAddresses().put(server1Id, 1F);
+    }
 
     public List<String> displayServerMessages() {
         List<String> messages = new ArrayList<>();
@@ -136,5 +140,9 @@ public class ServerCluster {
 
     public void setServers(List<Server> servers) {
         this.servers = servers;
+    }
+
+    public Map<Integer, Integer> getChartData(){
+        return this.chart;
     }
 }
