@@ -47,7 +47,7 @@ public class ServerCluster {
                 }
             }
             counter++;
-            if(errorCounter == 20) {
+            if(errorCounter >= 20) {
                 System.out.println("Osiągnięto limit błędów połączenia - część serwerów może być całkiem odłączona od sieci.");
                 System.out.println("Algorytm zajął: " + counter + " cykli");
                 break;
